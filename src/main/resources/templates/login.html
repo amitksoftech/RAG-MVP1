@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault | Sign in</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <section class="auth-panel card">
+            <div class="auth-brand">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Knowledge workspace</div>
+                </div>
+            </div>
+
+            <h1>Secure sign in</h1>
+
+            <div th:if="${param.error}" class="alert alert-error">
+                Invalid username or password.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out.
+            </div>
+
+            <form th:action="@{/login}" method="post" class="auth-form">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" required autocomplete="username" />
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required autocomplete="current-password" />
+
+                <button type="submit" class="button primary full-width">Log in</button>
+            </form>
+
+            <div class="demo-box">
+                <span class="demo-label">Demo accounts</span>
+                <div>admin / admin123</div>
+                <div>user / user123</div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

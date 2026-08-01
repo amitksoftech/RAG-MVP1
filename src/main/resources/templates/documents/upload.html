@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault | Upload</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Upload center</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link" th:href="@{/home}">Overview</a>
+                <a class="nav-link" th:href="@{/documents}">Documents</a>
+                <a class="nav-link active" th:href="@{/documents/upload}">Upload</a>
+                <a class="nav-link" th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Statistics</a>
+            </nav>
+
+            <div class="user-block">
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <main class="main-panel">
+            <section class="card upload-card">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Document intake</p>
+                        <h1>Upload knowledge files</h1>
+                    </div>
+                    <a class="button secondary" th:href="@{/documents}">Back to library</a>
+                </div>
+
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+                <form th:action="@{/documents/upload}" method="post" enctype="multipart/form-data" class="upload-form">
+                    <label class="dropzone" for="files">
+                        <input id="files" name="files" type="file" multiple accept=".txt,.md,.pdf,.doc,.docx,.csv,.json,.html,.rtf,.log,.ppt,.pptx" />
+                        <span class="dropzone-title">Choose files</span>
+                        <span class="dropzone-copy">Select one or many files to begin ingestion immediately.</span>
+                    </label>
+
+                    <div id="selected-files" class="selected-files" aria-live="polite">
+                        <div class="selected-files-header">Selected files</div>
+                        <ul id="selected-file-list" class="selected-file-list">
+                            <li class="empty-files">No files selected yet.</li>
+                        </ul>
+                    </div>
+
+                    <div class="upload-hint">
+                        <strong>Accepted:</strong> text documents, PDFs, Office files, and structured content.
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button primary">Upload and index</button>
+                    </div>
+                </form>
+
+                <script>
+                    const fileInput = document.getElementById('files');
+                    const selectedFileList = document.getElementById('selected-file-list');
+
+                    function renderSelectedFiles() {
+                        const files = Array.from(fileInput.files || []);
+                        selectedFileList.innerHTML = '';
+
+                        if (files.length === 0) {
+                            const empty = document.createElement('li');
+                            empty.className = 'empty-files';
+                            empty.textContent = 'No files selected yet.';
+                            selectedFileList.appendChild(empty);
+                            return;
+                        }
+
+                        files.forEach(file => {
+                            const item = document.createElement('li');
+                            item.className = 'selected-file-item';
+                            item.textContent = file.name;
+                            selectedFileList.appendChild(item);
+                        });
+                    }
+
+                    fileInput.addEventListener('change', renderSelectedFiles);
+                </script>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

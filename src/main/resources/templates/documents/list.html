@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault | Documents</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Repository</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link" th:href="@{/home}">Overview</a>
+                <a class="nav-link active" th:href="@{/documents}">Documents</a>
+                <a class="nav-link" th:href="@{/documents/upload}">Upload</a>
+                <a class="nav-link" th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Statistics</a>
+            </nav>
+
+            <div class="user-block">
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <main class="main-panel">
+            <section class="card workspace-card">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Document repository</p>
+                        <h1>Knowledge library</h1>
+                    </div>
+                    <a class="button primary" th:href="@{/documents/upload}">Upload files</a>
+                </div>
+
+                <form th:action="@{/documents/search}" method="get" class="search-form">
+                    <input type="text" name="query" placeholder="Search by filename" />
+                    <button type="submit" class="button secondary">Search</button>
+                </form>
+
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Status</th>
+                                <th>Uploaded</th>
+                                <th>Owner</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="document : ${documents}">
+                                <td th:text="${document.originalFilename}">-</td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${document.status.name() == 'READY'} ? ' is-ready' : (${document.status.name() == 'PROCESSING'} ? ' is-processing' : (${document.status.name() == 'FAILED'} ? ' is-failed' : ' is-uploaded'))"
+                                          th:text="${document.status}">-</span>
+                                </td>
+                                <td th:text="${#temporals.format(document.uploadedAt, 'yyyy-MM-dd HH:mm')}">-</td>
+                                <td th:text="${document.owner != null ? document.owner.username : 'System'}">-</td>
+                                <td>
+                                    <div class="row-actions">
+                                        <a class="table-link" th:href="@{/documents/{id}(id=${document.id})}">Open</a>
+                                        <form sec:authorize="hasRole('ADMIN')" th:action="@{/admin/documents/{id}/delete(id=${document.id})}" method="post" class="inline-operate-form" onsubmit="return confirm('Delete this document completely?');">
+                                            <button type="submit" class="delete-button">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(documents)}">
+                                <td colspan="5" class="empty-state">No documents found. Upload your first file to start indexing.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

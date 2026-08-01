@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Enterprise knowledge workspace</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link active" th:href="@{/home}">Overview</a>
+                <a class="nav-link" th:href="@{/documents}">Documents</a>
+                <a class="nav-link" th:href="@{/documents/upload}">Upload</a>
+                <a class="nav-link" th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Statistics</a>
+            </nav>
+
+            <div class="user-block">
+                <span class="user-name" th:text="${username}">user</span>
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <main class="main-panel">
+            <section class="hero-card card">
+                <div>
+                    <p class="eyebrow">Operations intelligence</p>
+                    <h1>Welcome back, <span th:text="${username}">operator</span></h1>
+                    <p class="muted copy">Upload internal documents and transform them into searchable, indexable knowledge assets for retrieval and team decision-making.</p>
+                </div>
+                <div class="hero-actions">
+                    <a class="button primary" th:href="@{/documents/upload}">Upload documents</a>
+                    <a class="button secondary" th:href="@{/documents}">Open repository</a>
+                </div>
+            </section>
+
+            <section class="stats-grid">
+                <article class="card stat-card">
+                    <div class="stat-label">Total documents</div>
+                    <div class="stat-value" th:text="${documentCount}">0</div>
+                    <div class="stat-meta">Indexed assets</div>
+                </article>
+                <article class="card stat-card">
+                    <div class="stat-label">Ready for retrieval</div>
+                    <div class="stat-value" th:text="${readyCount}">0</div>
+                    <div class="stat-meta">Ready for search</div>
+                </article>
+                <article class="card stat-card highlight">
+                    <div class="stat-label">Upload workflow</div>
+                    <div class="stat-value">Multi-file</div>
+                    <div class="stat-meta">Fast intake</div>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault | Document Details</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Knowledge details</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link" th:href="@{/home}">Overview</a>
+                <a class="nav-link active" th:href="@{/documents}">Documents</a>
+                <a class="nav-link" th:href="@{/documents/upload}">Upload</a>
+                <a class="nav-link" th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Statistics</a>
+            </nav>
+
+            <div class="user-block">
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <main class="main-panel">
+            <section class="card workspace-card" th:if="${document != null}">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Document status</p>
+                        <h1 th:text="${document.originalFilename}">Document</h1>
+                    </div>
+                    <a class="button secondary" th:href="@{/documents}">Back to library</a>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="card stat-card">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value">
+                            <span class="status-badge"
+                                  th:classappend="${document.status.name() == 'READY'} ? ' is-ready' : (${document.status.name() == 'PROCESSING'} ? ' is-processing' : (${document.status.name() == 'FAILED'} ? ' is-failed' : ' is-uploaded'))"
+                                  th:text="${document.status}">UPLOADED</span>
+                        </div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Chunks</div>
+                        <div class="stat-value" th:text="${document.chunkCount}">0</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Uploaded</div>
+                        <div class="stat-value" th:text="${#temporals.format(document.uploadedAt, 'yyyy-MM-dd HH:mm')}" >-</div>
+                    </article>
+                </div>
+
+                <div class="detail-block" th:if="${document.failureReason != null and !#strings.isEmpty(document.failureReason)}">
+                    <h3>Failure details</h3>
+                    <p th:text="${document.failureReason}">-</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

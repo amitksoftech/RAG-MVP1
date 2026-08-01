@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insight Vault | Statistics</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark">IV</div>
+                <div>
+                    <div class="brand-name">Insight Vault</div>
+                    <div class="brand-subtitle">Operations dashboard</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="nav-link" th:href="@{/home}">Overview</a>
+                <a class="nav-link" th:href="@{/documents}">Documents</a>
+                <a class="nav-link" th:href="@{/documents/upload}">Upload</a>
+                <a class="nav-link active" th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Statistics</a>
+            </nav>
+
+            <div class="user-block">
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <main class="main-panel">
+            <section class="card workspace-card">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">System health</p>
+                        <h1>Ingestion statistics</h1>
+                    </div>
+                    <a class="button secondary" th:href="@{/documents}">Back to documents</a>
+                </div>
+
+                <div class="stats-grid" th:if="${statistics != null}">
+                    <article class="card stat-card">
+                        <div class="stat-label">Total documents</div>
+                        <div class="stat-value" th:text="${statistics.totalDocuments}">0</div>
+                        <div class="stat-meta">All records tracked</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Uploaded</div>
+                        <div class="stat-value" th:text="${statistics.uploadedDocuments}">0</div>
+                        <div class="stat-meta">Waiting for processing</div>
+                    </article>
+                    <article class="card stat-card highlight">
+                        <div class="stat-label">Processing</div>
+                        <div class="stat-value" th:text="${statistics.processingDocuments}">0</div>
+                        <div class="stat-meta">Currently running</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Ready</div>
+                        <div class="stat-value" th:text="${statistics.readyDocuments}">0</div>
+                        <div class="stat-meta">Available for retrieval</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Failed</div>
+                        <div class="stat-value" th:text="${statistics.failedDocuments}">0</div>
+                        <div class="stat-meta">Requires attention</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" th:text="${statistics.documentsUploadedToday}">0</div>
+                        <div class="stat-meta">Uploaded today</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Avg chunks/doc</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(statistics.averageChunksPerDocument, 1, 2)}">0.00</div>
+                        <div class="stat-meta">Chunk density</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Total chunks</div>
+                        <div class="stat-value" th:text="${statistics.totalChunksIndexed}">0</div>
+                        <div class="stat-meta">Indexed embeddings</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Storage used</div>
+                        <div class="stat-value" th:text="${statistics.totalStorageBytes / 1024 / 1024}">0</div>
+                        <div class="stat-meta">MB stored</div>
+                    </article>
+                    <article class="card stat-card">
+                        <div class="stat-label">Active users</div>
+                        <div class="stat-value" th:text="${statistics.activeUsers}">0</div>
+                        <div class="stat-meta">Distinct contributors</div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
