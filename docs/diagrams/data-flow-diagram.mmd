@@ -1,0 +1,50 @@
+flowchart LR
+    subgraph Client
+        U[Browser / User]
+    end
+
+    subgraph WebLayer["Web Layer (Controllers)"]
+        LC[LoginController]
+        HC[HomeController]
+        DC[DocumentController]
+        AC[AdminController]
+    end
+
+    subgraph ServiceLayer["Service Layer"]
+        DS[DocumentService]
+        DSS[DocumentStorageService]
+        IP[IngestionProcessor]
+        EI[EmbeddingIndexer]
+        SS[StatisticsService]
+        ADS[AdminDocumentService]
+        US[UserService]
+        IEL[IngestionEventListener]
+    end
+
+    subgraph DataStores["Data Stores"]
+        DB[(PostgreSQL DB)]
+        FS[(Local File Storage)]
+        VS[(Vector Store)]
+    end
+
+    U -->|HTTP requests| WebLayer
+    DC --> DS
+    DS --> DSS --> FS
+    DS -->|persist metadata| DB
+    DS -->|publish event| IEL
+    IEL --> IP
+    IP -->|read file| FS
+    IP -->|extract & chunk text| EI
+    EI -->|store embeddings| VS
+    IP -->|update status| DB
+
+    AC --> SS --> DB
+    AC --> ADS
+    ADS -->|delete vectors| VS
+    ADS -->|delete file| FS
+    ADS -->|delete row| DB
+
+    LC --> US
+    US -->|bootstrap users| DB
+
+    WebLayer -->|render| U

@@ -1,0 +1,171 @@
+classDiagram
+    class AppUser {
+        -UUID id
+        -String username
+        -String password
+        -RoleName role
+        -Instant createdAt
+        +getId() UUID
+        +getUsername() String
+        +getRole() RoleName
+    }
+
+    class RoleName {
+        <<enumeration>>
+        ROLE_USER
+        ROLE_ADMIN
+    }
+
+    class KnowledgeDocument {
+        -UUID id
+        -String originalFilename
+        -String storedFilename
+        -String storagePath
+        -String checksum
+        -long fileSize
+        -String contentType
+        -AppUser owner
+        -DocumentStatus status
+        -int chunkCount
+        -Instant uploadedAt
+        -Instant processedAt
+        -String failureReason
+        +uploaded(...)$ KnowledgeDocument
+        +markProcessing()
+        +markReady(int)
+        +markFailed(String)
+        +markDeleting()
+    }
+
+    class DocumentStatus {
+        <<enumeration>>
+        UPLOADED
+        PROCESSING
+        READY
+        FAILED
+        DELETED
+    }
+
+    class StoredDocument {
+        <<record>>
+        +String storedFilename
+        +Path path
+        +String checksum
+    }
+
+    class DocumentUploadedEvent {
+        <<record>>
+        +UUID documentId
+    }
+
+    class IngestionStatistics {
+        <<record>>
+        +long totalDocuments
+        +long readyDocuments
+        +long failedDocuments
+        +double averageChunksPerDocument
+        +long totalChunksIndexed
+        +long totalStorageBytes
+        +long activeUsers
+    }
+
+    class AppUserRepository {
+        <<interface>>
+        +findByUsername(String) Optional~AppUser~
+        +existsByUsername(String) boolean
+    }
+
+    class KnowledgeDocumentRepository {
+        <<interface>>
+        +findByOwnerUsernameOrderByUploadedAtDesc(String) List~KnowledgeDocument~
+        +findAllByOrderByUploadedAtDesc() List~KnowledgeDocument~
+        +countByStatus(DocumentStatus) long
+    }
+
+    class DocumentService {
+        -ApplicationEventPublisher eventPublisher
+        -AppUserRepository userRepository
+        -KnowledgeDocumentRepository documentRepository
+        -DocumentStorageService storageService
+        +upload(MultipartFile, String) UUID
+        +findVisibleDocuments(Authentication) List~KnowledgeDocument~
+        +findAuthorizedDocument(UUID, Authentication) KnowledgeDocument
+        +search(String, Authentication) List~KnowledgeDocument~
+    }
+
+    class DocumentStorageService {
+        -StorageProperties storageProperties
+        +store(MultipartFile) StoredDocument
+        +delete(Path)
+    }
+
+    class IngestionProcessor {
+        -KnowledgeDocumentRepository documentRepository
+        -EmbeddingIndexer embeddingIndexer
+        +process(UUID)
+        -extractText(Path) String
+        -splitIntoChunks(String) List~String~
+    }
+
+    class EmbeddingIndexer {
+        -VectorStore vectorStore
+        +index(KnowledgeDocument, List~String~)
+    }
+
+    class IngestionEventListener {
+        -IngestionProcessor ingestionProcessor
+        +process(DocumentUploadedEvent)
+    }
+
+    class AdminDocumentService {
+        -KnowledgeDocumentRepository documentRepository
+        -DocumentStorageService storageService
+        -VectorStore vectorStore
+        +deleteDocument(UUID)
+    }
+
+    class StatisticsService {
+        -KnowledgeDocumentRepository repository
+        +getStatistics() IngestionStatistics
+    }
+
+    class UserService {
+        -AppUserRepository userRepository
+        -PasswordEncoder passwordEncoder
+        +bootstrapUsers()
+    }
+
+    class DocumentController {
+        -DocumentService documentService
+        +listDocuments(Authentication, Model) String
+        +upload(MultipartFile[], Authentication, RedirectAttributes) String
+        +documentDetails(UUID, Authentication, Model) String
+        +search(String, Authentication, Model) String
+    }
+
+    class AdminController {
+        -StatisticsService statisticsService
+        -AdminDocumentService adminDocumentService
+        +statistics(Model) String
+        +deleteDocument(UUID, RedirectAttributes) String
+    }
+
+    AppUser "1" -- "*" KnowledgeDocument : owns
+    AppUser --> RoleName
+    KnowledgeDocument --> DocumentStatus
+    DocumentService --> AppUserRepository
+    DocumentService --> KnowledgeDocumentRepository
+    DocumentService --> DocumentStorageService
+    DocumentService --> DocumentUploadedEvent
+    DocumentService ..> StoredDocument
+    IngestionEventListener --> IngestionProcessor
+    IngestionProcessor --> KnowledgeDocumentRepository
+    IngestionProcessor --> EmbeddingIndexer
+    AdminDocumentService --> KnowledgeDocumentRepository
+    AdminDocumentService --> DocumentStorageService
+    StatisticsService --> KnowledgeDocumentRepository
+    StatisticsService ..> IngestionStatistics
+    UserService --> AppUserRepository
+    DocumentController --> DocumentService
+    AdminController --> StatisticsService
+    AdminController --> AdminDocumentService
