@@ -1,0 +1,37 @@
+erDiagram
+    APP_USER {
+        UUID id PK
+        string username UK
+        string password
+        string role
+        instant createdAt
+    }
+
+    KNOWLEDGE_DOCUMENT {
+        UUID id PK
+        string originalFilename
+        string storedFilename
+        string storagePath
+        string checksum
+        long fileSize
+        string contentType
+        UUID owner_user_id FK
+        string status
+        int chunkCount
+        instant uploadedAt
+        instant processedAt
+        string failureReason
+    }
+
+    VECTOR_STORE_ENTRY {
+        string id PK
+        string content
+        string document_id FK
+        string owner_user_id FK
+        string source_name
+        int chunk_number
+        vector embedding
+    }
+
+    APP_USER ||--o{ KNOWLEDGE_DOCUMENT : owns
+    KNOWLEDGE_DOCUMENT ||--o{ VECTOR_STORE_ENTRY : "indexed as"

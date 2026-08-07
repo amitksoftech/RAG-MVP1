@@ -1,0 +1,34 @@
+flowchart TD
+    A[User] -->|Login| B[LoginController]
+    B --> C[SecurityConfiguration / DatabaseUserDetailsService]
+    C -->|Authenticated| D[HomeController]
+    A -->|Upload Document| E[DocumentController]
+    E --> F[DocumentService.upload]
+    F --> G[DocumentStorageService.store]
+    G -->|Save file + checksum| H[(File Storage)]
+    F --> I[KnowledgeDocumentRepository.save]
+    I --> J[(PostgreSQL: knowledge_document)]
+    F --> K[ApplicationEventPublisher]
+    K -->|DocumentUploadedEvent AFTER_COMMIT| L[IngestionEventListener - Async]
+    L --> M[IngestionProcessor.process]
+    M --> N[Apache Tika: extractText]
+    N --> O[splitIntoChunks]
+    O --> P[EmbeddingIndexer.index]
+    P --> Q[VectorStore.add]
+    Q --> R[(Vector Store: embeddings + metadata)]
+    M --> S[KnowledgeDocument.markReady/markFailed]
+    S --> I
+
+    A -->|View documents| E
+    E --> T[DocumentService.findVisibleDocuments/search]
+    T --> I
+
+    A -->|Admin: view stats| U[AdminController]
+    U --> V[StatisticsService.getStatistics]
+    V --> I
+
+    A -->|Admin: delete document| U
+    U --> W[AdminDocumentService.deleteDocument]
+    W --> R
+    W --> H
+    W --> I
